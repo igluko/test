@@ -36,8 +36,9 @@ ram_size=$(free -m | grep Mem | awk '{print $2}')
 
 # Check for NVIDIA GPU using nvidia-smi
 if command -v nvidia-smi &> /dev/null; then
-    gpu_model=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader,nounits | head -1)
-    vram_size=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -1)
+    gpu_info=$(nvidia-smi)
+    gpu_model=$(echo "$gpu_info" | grep -Po 'NVIDIA GeForce RTX \d+' | head -1)
+    vram_size=$(echo "$gpu_info" | grep -Po '\d+MiB / \d+MiB' | grep -Po '\d+MiB' | tail -1)
 else
     gpu_model="Not found"
     vram_size="Unavailable"
@@ -47,7 +48,8 @@ fi
 echo "CPU Model: $cpu_model"
 echo "GPU Model: ${gpu_model}"
 echo "RAM Size (MB): $ram_size"
-[ -n "$vram_size" ] && echo "VRAM Size (GB): $vram_size"
+[ -n "$vram_size" ] && echo "VRAM Size (GB): ${vram_size/MiB/GB}"
+
 
 # Get list of available neural networks
 networks=$(ollama list | awk 'NR>1 {print $1}')
