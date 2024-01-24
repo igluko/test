@@ -34,21 +34,18 @@ fi
 cpu_model=$(lscpu | grep "Model name:" | cut -d ':' -f2 | xargs)
 ram_size=$(free -m | grep Mem | awk '{print $2}')
 
-# Check for GPU using lspci or nvidia-smi
-if command -v lspci &> /dev/null; then
-    gpu_model=$(lspci | grep -i vga | cut -d ':' -f3 | xargs)
-elif command -v nvidia-smi &> /dev/null; then
-    gpu_model=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader,nounits | head -1)
-fi
-
-# Get VRAM size if nvidia-smi is available
+# Check for NVIDIA GPU using nvidia-smi
 if command -v nvidia-smi &> /dev/null; then
+    gpu_model=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader,nounits | head -1)
     vram_size=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -1)
+else
+    gpu_model="Not found"
+    vram_size="Unavailable"
 fi
 
 # Output system information
 echo "CPU Model: $cpu_model"
-echo "GPU Model: ${gpu_model:-'Not found'}"
+echo "GPU Model: ${gpu_model}"
 echo "RAM Size (MB): $ram_size"
 [ -n "$vram_size" ] && echo "VRAM Size (GB): $vram_size"
 
