@@ -32,19 +32,18 @@ fi
 
 # Get system information
 cpu_model=$(lscpu | grep "Model name:" | cut -d ':' -f2 | xargs)
+ram_size=$(free -m | grep Mem | awk '{print $2}')
 
 # Check for GPU using lspci or nvidia-smi
 if command -v lspci &> /dev/null; then
     gpu_model=$(lspci | grep -i vga | cut -d ':' -f3 | xargs)
 elif command -v nvidia-smi &> /dev/null; then
-    gpu_model=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader,nounits)
+    gpu_model=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader,nounits | head -1)
 fi
-
-ram_size=$(free -m | grep Mem | awk '{print $2}')
 
 # Get VRAM size if nvidia-smi is available
 if command -v nvidia-smi &> /dev/null; then
-    vram_size=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | awk '{print $1}')
+    vram_size=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -1)
 fi
 
 # Output system information
