@@ -46,7 +46,7 @@ fi
 if [[ $gpu_model == *"NVIDIA"* ]]; then
     vram_size=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | awk '{print $1}')
 else
-    vram_size="Unavailable"
+    vram_size=
 fi
 
 # Output system information
