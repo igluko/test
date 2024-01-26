@@ -30,6 +30,24 @@ then
     if ! command -v bc &> /dev/null; then sudo apt-get install -y bc; fi
 fi
 
+# Check if ollama is installed, and install it if not
+if ! command -v ollama &> /dev/null
+then
+    echo "Installing ollama..."
+    curl https://ollama.ai/install.sh | sh
+fi
+
+# Check for required neural network models
+required_models=("dolphin-mixtral" "mixtral" "mistral")
+available_models=$(ollama list | awk 'NR>1 {print $1}')
+
+for model in "${required_models[@]}"; do
+    if ! echo "$available_models" | grep -q "$model"; then
+        echo "Pulling model $model..."
+        ollama pull $model
+    fi
+done
+
 # Get system information
 cpu_model=$(lscpu | grep "Model name:" | cut -d ':' -f2 | xargs)
 ram_size_mb=$(free -m | grep Mem | awk '{print $2}')
